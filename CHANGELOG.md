@@ -2,6 +2,12 @@
 
 All notable changes to Medal Detector. This project uses [semantic versioning](https://semver.org).
 
+## [2.0.2] – 2026-10-29
+
+### Changed
+- The sidebar row is now just **Medal Detector:** and **[open]**, with [open] on the right like Torn's own links. The count and arrow are gone, so it fits on one line.
+- Showing your goals under the row is now a setting: **Settings → Goals in the sidebar**.
+
 ## [2.0.1] – 2026-10-29
 
 ### Fixed
@@ -71,5 +77,6 @@ First public release. Earlier versions were private test builds called **Merit H
 ### 1.0.0
 - Daily goals tracked against your real Torn stats, with streaks, history and reminders.
 
+[2.0.2]: https://github.com/Eaglewing91/Medal-Detector/releases/tag/v2.0.2
 [2.0.1]: https://github.com/Eaglewing91/Medal-Detector/releases/tag/v2.0.1
 [2.0.0]: https://github.com/Eaglewing91/Medal-Detector/releases/tag/v2.0.0

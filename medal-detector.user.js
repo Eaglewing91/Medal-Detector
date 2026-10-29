@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Medal Detector
 // @namespace    eaglewing91.torn.medaldetector
-// @version      2.0.1
+// @version      2.0.2
 // @description  Track every Torn honour and medal, see your next award for each stat, and set daily goals towards them. Uses only the official Torn API.
 // @author       Eaglewing [571041]
 // @license      MIT
@@ -21,7 +21,7 @@
 // ==/UserScript==
 
 /*
- * Medal Detector v2.0.1
+ * Medal Detector v2.0.2
  * Copyright (c) 2026 Eaglewing [571041]. Released under the MIT licence (see LICENSE).
  */
 
@@ -422,6 +422,7 @@
     notifyHours: 3,         // hours before 00:00 TCT
     side: 'right',
     button: 'sidebar',      // 'sidebar' = row under Merits, 'floating' = round button
+    sidebarGoals: true,     // list goals under the sidebar row
     historyDays: 60,
     drugCdReduction: 0,     // % shorter drug cooldowns (perks), used for estimates
   };
@@ -1183,31 +1184,20 @@
     const name = document.createElement('span');
     name.className = spans[0] ? spans[0].className : '';
     name.textContent = 'Medal Detector:';
-    // Torn's label column is sized for short words ("Merits:"), so let this label size itself on one line.
-    name.style.cssText = 'width:auto;min-width:0;flex:none;white-space:nowrap;margin-right:4px';
-    entry.style.whiteSpace = 'nowrap';
-    const val = document.createElement('span');
-    val.className = spans[1] ? spans[1].className : '';
-    val.id = 'mh-sidebar-val';
-    val.style.cssText = 'width:auto;min-width:0;white-space:nowrap';
-    const caret = document.createElement('a');
-    caret.href = '#';
-    caret.id = 'mh-sidebar-caret';
-    caret.style.cssText = 'margin:0 6px 0 4px;text-decoration:none;opacity:.7;font-size:10px;color:inherit';
-    caret.addEventListener('click', (e) => {
-      e.preventDefault();
-      store.set('mh_sb_collapsed', !store.get('mh_sb_collapsed', false));
-      sidebarGoalsHtml = null;
-      render();
-    });
+    // Just the name and [open]. Torn's label column is sized for short words ("Merits:"),
+    // so force this row onto one line, with [open] on the right like Torn's [use] links.
+    const force = (el, css) => Object.entries(css).forEach(([k, v]) => el.style.setProperty(k, v, 'important'));
+    force(entry, { display: 'flex', 'align-items': 'center', 'white-space': 'nowrap', 'flex-wrap': 'nowrap' });
+    force(name, { width: 'auto', 'min-width': '0', 'max-width': 'none', flex: '0 0 auto', 'white-space': 'nowrap', overflow: 'visible' });
     const link = document.createElement('a');
     link.href = '#';
     link.className = useLink.className;
     link.setAttribute('aria-label', 'Open Medal Detector');
     link.textContent = '[open]';
+    force(link, { 'margin-left': 'auto', 'padding-left': '6px', flex: '0 0 auto', 'white-space': 'nowrap' });
     // Only opens our own window: no navigation, no request to Torn.
     link.addEventListener('click', (e) => { e.preventDefault(); togglePanel(); });
-    entry.append(name, val, caret, link);
+    entry.append(name, link);
     row.after(entry);
     const staleBox = document.getElementById(SIDEBAR_GOALS_ID);
     if (staleBox) staleBox.remove();
@@ -1235,21 +1225,9 @@
   const isGoalDone = (v) => v.met || (v.allEarned && !(v.goal.daily > 0));
 
   function updateSidebar(views) {
-    const val = document.getElementById('mh-sidebar-val');
-    if (!val) return;
-    const daily = views.filter((v) => v.goal.daily > 0);
-    const met = daily.filter((v) => v.met).length;
-    if (!daily.length) { val.textContent = views.length ? '' : '–'; val.style.color = ''; val.title = views.length ? '' : 'No goals set'; }
-    else {
-      val.textContent = met === daily.length ? `✓ ${met}/${daily.length}` : `${met}/${daily.length}`;
-      val.style.color = met === daily.length ? '#7cbf5a' : '';
-      val.title = `${met} of ${daily.length} daily goals done today`;
-    }
     const box = document.getElementById(SIDEBAR_GOALS_ID);
-    const caret = document.getElementById('mh-sidebar-caret');
-    const collapsed = !!store.get('mh_sb_collapsed', false);
-    if (caret) { caret.textContent = views.length ? (collapsed ? '▸' : '▾') : ''; caret.title = collapsed ? 'Show goals' : 'Hide goals'; }
     if (!box) return;
+    const collapsed = loadSettings().sidebarGoals === false;
     let html = '';
     if (views.length && !collapsed) {
       const showDone = !!store.get('mh_sb_showdone', false);
@@ -1936,6 +1914,8 @@
       <div class="list">
         <div class="set"><div><b>Open button</b><span>The sidebar row sits under Merits and lists your goals.</span></div>
           <select data-s="button" aria-label="Open button">${opt('sidebar', 'Sidebar, under Merits', settings.button !== 'floating' ? 'sidebar' : 'floating')}${opt('floating', 'Floating button', settings.button === 'floating' ? 'floating' : 'sidebar')}</select></div>
+        <div class="set"><div><b>Goals in the sidebar</b><span>List your goals under the Medal Detector row. Finished ones are hidden.</span></div>
+          <label class="check"><input type="checkbox" data-s="sidebarGoals" ${settings.sidebarGoals !== false ? 'checked' : ''}> ${settings.sidebarGoals !== false ? 'Shown' : 'Hidden'}</label></div>
         <div class="set"><div><b>Floating button side</b><span>Used when the floating button is shown.</span></div>
           <select data-s="side" aria-label="Floating button side">${opt('right', 'Right', settings.side)}${opt('left', 'Left', settings.side)}</select></div>
       </div>
@@ -2077,6 +2057,7 @@
       if (k === 'notifyHours') s[k] = Math.min(23, s[k]);
       saveSettings(s);
       if (k === 'button') mountSidebar();
+      if (k === 'sidebarGoals') sidebarGoalsHtml = null;
       toast('Saved');
       render();
     }
