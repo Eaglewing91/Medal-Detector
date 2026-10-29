@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Medal Detector
 // @namespace    eaglewing91.torn.medaldetector
-// @version      2.0.0
+// @version      2.0.1
 // @description  Track every Torn honour and medal, see your next award for each stat, and set daily goals towards them. Uses only the official Torn API.
 // @author       Eaglewing [571041]
 // @license      MIT
@@ -21,7 +21,7 @@
 // ==/UserScript==
 
 /*
- * Medal Detector v2.0.0
+ * Medal Detector v2.0.1
  * Copyright (c) 2026 Eaglewing [571041]. Released under the MIT licence (see LICENSE).
  */
 
@@ -1183,13 +1183,17 @@
     const name = document.createElement('span');
     name.className = spans[0] ? spans[0].className : '';
     name.textContent = 'Medal Detector:';
+    // Torn's label column is sized for short words ("Merits:"), so let this label size itself on one line.
+    name.style.cssText = 'width:auto;min-width:0;flex:none;white-space:nowrap;margin-right:4px';
+    entry.style.whiteSpace = 'nowrap';
     const val = document.createElement('span');
     val.className = spans[1] ? spans[1].className : '';
     val.id = 'mh-sidebar-val';
+    val.style.cssText = 'width:auto;min-width:0;white-space:nowrap';
     const caret = document.createElement('a');
     caret.href = '#';
     caret.id = 'mh-sidebar-caret';
-    caret.style.cssText = 'margin-left:4px;text-decoration:none;opacity:.7;font-size:10px;color:inherit';
+    caret.style.cssText = 'margin:0 6px 0 4px;text-decoration:none;opacity:.7;font-size:10px;color:inherit';
     caret.addEventListener('click', (e) => {
       e.preventDefault();
       store.set('mh_sb_collapsed', !store.get('mh_sb_collapsed', false));
