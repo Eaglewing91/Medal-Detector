@@ -2,6 +2,11 @@
 
 All notable changes to Medal Detector. This project uses [semantic versioning](https://semver.org).
 
+## [2.1.1] – 2026-10-29
+
+### Fixed
+- On phones and in Torn PDA, the menu is now a tab bar that shows every page at once. **Settings** was hidden off the edge of the screen.
+
 ## [2.1.0] – 2026-10-29
 
 ### Added
@@ -91,6 +96,7 @@ First public release. Earlier versions were private test builds called **Merit H
 ### 1.0.0
 - Daily goals tracked against your real Torn stats, with streaks, history and reminders.
 
+[2.1.1]: https://github.com/Eaglewing91/Medal-Detector/releases/tag/v2.1.1
 [2.1.0]: https://github.com/Eaglewing91/Medal-Detector/releases/tag/v2.1.0
 [2.0.3]: https://github.com/Eaglewing91/Medal-Detector/releases/tag/v2.0.3
 [2.0.2]: https://github.com/Eaglewing91/Medal-Detector/releases/tag/v2.0.2

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Medal Detector
 // @namespace    eaglewing91.torn.medaldetector
-// @version      2.1.0
+// @version      2.1.1
 // @description  Track every Torn honour and medal, see your next award for each stat, and set daily goals towards them. Uses only the official Torn API.
 // @author       Eaglewing [571041]
 // @license      MIT
@@ -21,7 +21,7 @@
 // ==/UserScript==
 
 /*
- * Medal Detector v2.1.0
+ * Medal Detector v2.1.1
  * Copyright (c) 2026 Eaglewing [571041]. Released under the MIT licence (see LICENSE).
  */
 
@@ -1117,10 +1117,15 @@
   @media (max-width:760px){
     .backdrop{padding:0}
     .modal{border-radius:0;height:100%;grid-template-columns:1fr;grid-template-rows:auto auto 1fr}
-    .nav{flex-direction:row;border-right:0;border-bottom:1px solid var(--line);padding:6px;overflow-x:auto}
-    .nav button{width:auto;flex:none;padding:7px 10px}
+    /* Phones: every page fits in one tab bar, no sideways scrolling */
+    .nav{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;border-right:0;border-bottom:1px solid var(--line);padding:4px;overflow:visible}
+    .nav button{width:auto;min-width:0;flex-direction:column;justify-content:center;gap:3px;padding:7px 2px 6px;font-size:10.5px;line-height:1.1;text-align:center}
+    .nav button span:not(.count){display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .nav button .ic{width:18px;height:18px}
     .nav button[aria-current="page"]{box-shadow:inset 0 -2px 0 var(--brass)}
     .nav .count,.nav .foot,.updated{display:none}
+    .keyrow{flex-wrap:wrap}
+    .keyrow input{flex:1 1 100%}
     .main{padding:16px}
     .board{grid-template-columns:repeat(2,1fr)}
     .fig:nth-child(3){border-left:0}
