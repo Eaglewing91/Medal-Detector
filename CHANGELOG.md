@@ -2,6 +2,15 @@
 
 All notable changes to Medal Detector. This project uses [semantic versioning](https://semver.org).
 
+## [2.1.0] – 2026-10-29
+
+### Added
+- **Torn PDA support.** Medal Detector uses the API key you've set up in PDA automatically. A key pasted into Settings still takes priority.
+- A **floating medal button** on phones and in Torn PDA, where Torn hides the sidebar behind its menu. It shows how many daily goals are left.
+
+### Changed
+- Reminders are turned off in Torn PDA, which shows notifications as pop-up boxes.
+
 ## [2.0.3] – 2026-10-29
 
 ### Changed
@@ -82,6 +91,7 @@ First public release. Earlier versions were private test builds called **Merit H
 ### 1.0.0
 - Daily goals tracked against your real Torn stats, with streaks, history and reminders.
 
+[2.1.0]: https://github.com/Eaglewing91/Medal-Detector/releases/tag/v2.1.0
 [2.0.3]: https://github.com/Eaglewing91/Medal-Detector/releases/tag/v2.0.3
 [2.0.2]: https://github.com/Eaglewing91/Medal-Detector/releases/tag/v2.0.2
 [2.0.1]: https://github.com/Eaglewing91/Medal-Detector/releases/tag/v2.0.1

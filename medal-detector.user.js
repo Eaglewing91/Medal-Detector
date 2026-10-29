@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Medal Detector
 // @namespace    eaglewing91.torn.medaldetector
-// @version      2.0.3
+// @version      2.1.0
 // @description  Track every Torn honour and medal, see your next award for each stat, and set daily goals towards them. Uses only the official Torn API.
 // @author       Eaglewing [571041]
 // @license      MIT
@@ -21,7 +21,7 @@
 // ==/UserScript==
 
 /*
- * Medal Detector v2.0.3
+ * Medal Detector v2.1.0
  * Copyright (c) 2026 Eaglewing [571041]. Released under the MIT licence (see LICENSE).
  */
 
@@ -428,6 +428,14 @@
   };
 
   const API_ROOT = 'https://api.torn.com/';
+  // Torn PDA (mobile app) support. PDA swaps the placeholder below for the key you set up in PDA.
+  const IS_PDA = (() => { try { return typeof window.flutter_inappwebview !== 'undefined' || /tornpda/i.test(navigator.userAgent || ''); } catch (e) { return false; } })();
+  const PDA_KEY = '###PDA-APIKEY###';
+  const pdaKey = () => (IS_PDA && PDA_KEY && PDA_KEY.indexOf('#') === -1 ? PDA_KEY : '');
+  // Your own saved key wins; otherwise use the one Torn PDA provides.
+  const getKey = () => store.get('mh_key', '') || pdaKey();
+  // Phones and Torn PDA hide Torn's sidebar behind a menu, so they also get the floating button.
+  const isSmallScreen = () => { try { return IS_PDA || window.innerWidth < 785; } catch (e) { return false; } };
   // Opens Torn's own "new API key" page pre-filled for a Limited key (only when you click it).
   const KEY_LINK = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=Medal%20Detector&type=3';
   const DAY_MS = 86400000;
@@ -474,7 +482,7 @@
   /*  API (api.torn.com only)                                            */
   /* ------------------------------------------------------------------ */
   function apiGet(params, section = 'user') {
-    const key = store.get('mh_key', '');
+    const key = getKey();
     if (!key) return Promise.reject(new Error('No API key set'));
     const qs = new URLSearchParams({ ...params, key, comment: 'MedalDetector' }).toString();
     return new Promise((resolve, reject) => {
@@ -597,7 +605,7 @@
     const now = Date.now();
     if (refreshing) return;
     if (!force && now - state.lastFetch < refreshEveryMs(settings)) return;
-    if (!store.get('mh_key', '')) return;
+    if (!getKey()) return;
 
     refreshing = true;
     // claim the slot first so other tabs don't call at the same time
@@ -792,6 +800,7 @@
   /*  Notifications (optional)                                           */
   /* ------------------------------------------------------------------ */
   function maybeNotify() {
+    if (IS_PDA) return; // Torn PDA turns notifications into a pop-up box, so reminders are off there
     const s = loadSettings();
     if (!s.notify) return;
     const now = Date.now();
@@ -1345,7 +1354,7 @@
     updateSidebar(ctx.views);
 
     let fab = '';
-    if (settings.button === 'floating' || (!sidebarFound && sidebarWaitOver && !document.getElementById(SIDEBAR_ID))) {
+    if (settings.button === 'floating' || isSmallScreen() || (!sidebarFound && sidebarWaitOver && !document.getElementById(SIDEBAR_ID))) {
       const allDone = metCount === dailyViews.length;
       const fabPos = settings.side === 'left' ? 'left:12px' : 'right:12px';
       const badge = dailyViews.length ? `<span class="badge ${allDone ? 'ok' : ''}">${allDone ? '✓' : dailyViews.length - metCount}</span>` : '';
@@ -1416,7 +1425,7 @@
 
   function noticesHtml(state) {
     let h = '';
-    if (!store.get('mh_key', '')) h += `<div class="note warn" style="margin:0 0 16px">${icon('settings')}<span>Add a <b>Limited</b> API key in <a href="#" class="link" data-tab-link="settings">Settings</a> to start tracking. One key covers everything.</span></div>`;
+    if (!getKey()) h += `<div class="note warn" style="margin:0 0 16px">${icon('settings')}<span>Add a <b>Limited</b> API key in <a href="#" class="link" data-tab-link="settings">Settings</a> to start tracking. One key covers everything.</span></div>`;
     if (state.error) h += `<div class="note err" style="margin:0 0 16px">${icon('close')}<span>${esc(state.error)}</span></div>`;
     if (state.catError) h += `<div class="note err" style="margin:0 0 16px">${icon('close')}<span>Award list: ${esc(state.catError)}</span></div>`;
     return h;
@@ -1904,13 +1913,14 @@
   function settingsHtml(ctx) {
     const { settings, state } = ctx;
     const key = store.get('mh_key', '');
+    const usingPda = !key && !!pdaKey();
     const opt = (v, l, cur) => `<option value="${v}" ${String(cur) === String(v) ? 'selected' : ''}>${l}</option>`;
     return noticesHtml(state) + `<div class="ph"><div><h2>Settings</h2><p>Your key and data stay on this device. The key is only ever sent to api.torn.com.</p></div></div>
       <h3>API key</h3>
       <div class="list"><div class="set wide"><div>
         <div class="keyrow"><input id="s-key" type="password" placeholder="Paste your Torn API key" value="${esc(key)}" aria-label="API key" autocomplete="off">
         <button class="btn primary" data-a="savekey">${key ? 'Save and test' : 'Save'}</button>${key ? '<button class="btn secondary" data-a="clearkey">Remove</button>' : ''}</div>
-        <div class="keymsg" id="s-keymsg"></div>
+        <div class="keymsg ${usingPda ? 'ok' : ''}" id="s-keymsg">${usingPda ? 'Using the API key from Torn PDA. Paste a key here to use a different one.' : ''}</div>
         <span style="margin-top:8px">Medal Detector needs one <b style="display:inline;color:var(--text)">Limited</b> key for everything: stats, awards, gym, working stats, education and perks. <a class="link" href="${KEY_LINK}" target="_blank" rel="noopener">Create a Limited key for Medal Detector</a></span>
       </div></div></div>
 
@@ -1924,7 +1934,7 @@
 
       <h3>Reminders</h3>
       <div class="list">
-        <div class="set"><div><b>Remind me about unfinished daily goals</b><span>Sends a notification before the Torn day ends. Needs a Torn tab open; a background tab is fine.</span></div>
+        <div class="set"><div><b>Remind me about unfinished daily goals</b><span>${IS_PDA ? "Not available in Torn PDA, which shows notifications as a pop-up box." : 'Sends a notification before the Torn day ends. Needs a Torn tab open; a background tab is fine.'}</span></div>
           <label class="check"><input type="checkbox" data-s="notify" ${settings.notify ? 'checked' : ''}> ${settings.notify ? 'On' : 'Off'}</label></div>
         <div class="set"><div><b>Hours before the day ends</b><span>When to send the reminder.</span></div>
           <input type="number" min="1" max="23" data-s="notifyHours" value="${settings.notifyHours}" aria-label="Hours before the day ends"></div>
@@ -1932,7 +1942,7 @@
 
       <h3>Display</h3>
       <div class="list">
-        <div class="set"><div><b>Open button</b><span>The sidebar row sits under Merits and lists your goals.</span></div>
+        <div class="set"><div><b>Open button</b><span>The sidebar row sits under Merits and lists your goals. On phones and in Torn PDA the floating button is always shown too.</span></div>
           <select data-s="button" aria-label="Open button">${opt('sidebar', 'Sidebar, under Merits', settings.button !== 'floating' ? 'sidebar' : 'floating')}${opt('floating', 'Floating button', settings.button === 'floating' ? 'floating' : 'sidebar')}</select></div>
         <div class="set"><div><b>Goals in the sidebar</b><span>List your goals under the Medal Detector row. Finished ones are hidden.</span></div>
           <label class="check"><input type="checkbox" data-s="sidebarGoals" ${settings.sidebarGoals !== false ? 'checked' : ''}> ${settings.sidebarGoals !== false ? 'Shown' : 'Hidden'}</label></div>
@@ -2093,6 +2103,8 @@
   // and keeps the countdown in the header ticking. It only ever calls api.torn.com.
   let ticks = 0;
   setInterval(() => { refresh(false); if (open && ++ticks % 6 === 0) render(true); }, 10000);
+  // Screen size changes (e.g. rotating a phone) can switch the floating button on or off.
+  try { window.addEventListener('resize', () => { clearTimeout(window.__mdResize); window.__mdResize = setTimeout(() => render(true), 200); }); } catch (e) { /* ignore */ }
   // Coming back to the tab: check again.
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshSoon(0); });
   // After you click something in Torn (bust, use an item, attack...), check again a few seconds later.

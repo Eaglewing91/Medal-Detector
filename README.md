@@ -10,10 +10,18 @@ Track every Torn honour and medal, see your next award for each stat, and set da
 
 1. Install [Tampermonkey](https://www.tampermonkey.net/) for your browser.
 2. Open **[medal-detector.user.js](https://raw.githubusercontent.com/Eaglewing91/Medal-Detector/main/medal-detector.user.js)** and click **Install** in Tampermonkey.
-3. Load any Torn page. A **Medal Detector** row appears in the sidebar, just under **Merits**. Click **[open]**.
+3. Load any Torn page. A **Medal Detector** row appears in the sidebar, just under **Merits**. Click **[open]**. On phones, tap the **medal button** in the bottom-right corner instead.
 4. Go to **Settings**, follow **Create a Limited key for Medal Detector**, and paste the key in.
 
 Updates install automatically through Tampermonkey.
+
+### Torn PDA
+
+1. In Torn PDA, open **Settings → Advanced browser settings → User scripts** and add a new script.
+2. Choose to load it from a URL and use the [install link](https://raw.githubusercontent.com/Eaglewing91/Medal-Detector/main/medal-detector.user.js), or paste the script's code.
+3. Open Torn in PDA's browser and tap the **medal button** in the bottom-right corner.
+
+Medal Detector uses the API key you've already set up in Torn PDA, so there's nothing to paste. PDA needs to allow that key the access levels listed under Terms of service below; if it doesn't, add a Limited key in Medal Detector's Settings instead. Reminders aren't available in PDA, because it shows notifications as pop-up boxes.
 
 > **Upgrading from Merit Hunter?** Medal Detector is the same script under a new name, so Tampermonkey installs it as a new script. Remove Merit Hunter, then add your API key and goals again in Medal Detector.
 
@@ -94,6 +102,8 @@ Medal Detector follows Torn's rules for scripts:
 | **Purpose of Use** | Personal gain: tracking your own goals and merit milestones |
 | **Key Storage & Sharing** | Stored / Used only for automation (sent only to api.torn.com) |
 | **Key Access Level** | Limited (user: personalstats, profile, honors, medals, battlestats, workstats, education, perks; torn: honors, medals) |
+
+In Torn PDA, Medal Detector uses the key PDA provides and doesn't store it. A key you paste into Settings is stored on your device as above.
 
 This table is also shown in the script's Settings page, where you enter your key. Your key and data never leave your device except to go to `api.torn.com`.
 
