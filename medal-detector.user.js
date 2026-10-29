@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Medal Detector
 // @namespace    eaglewing91.torn.medaldetector
-// @version      2.0.2
+// @version      2.0.3
 // @description  Track every Torn honour and medal, see your next award for each stat, and set daily goals towards them. Uses only the official Torn API.
 // @author       Eaglewing [571041]
 // @license      MIT
@@ -21,7 +21,7 @@
 // ==/UserScript==
 
 /*
- * Medal Detector v2.0.2
+ * Medal Detector v2.0.3
  * Copyright (c) 2026 Eaglewing [571041]. Released under the MIT licence (see LICENSE).
  */
 
@@ -1224,6 +1224,25 @@
 
   const isGoalDone = (v) => v.met || (v.allEarned && !(v.goal.daily > 0));
 
+  // Short names for the narrow sidebar ("Busts: 3/5"). Award-only goals keep the award's name.
+  const SHORT_LABEL = {
+    peoplebusted: 'Busts', peoplebought: 'Bails', bloodwithdrawn: 'Blood bags', revives: 'Revives', medicalitemsused: 'Medical items',
+    attackswon: 'Attacks won', defendswon: 'Defends won', attackswonabroad: 'Wins abroad', attackcriticalhits: 'Critical hits', attackhits: 'Hits',
+    onehitkills: 'One hit kills', attacksstealthed: 'Stealth attacks', attacksassisted: 'Assists', retals: 'Retaliations', rankedwarhits: 'RW hits',
+    unarmoredwon: 'Unarmoured wins', attackdamage: 'Damage', bestdamage: 'Best hit', respectforfaction: 'Respect', bestkillstreak: 'Kill streak',
+    roundsfired: 'Rounds fired', specialammoused: 'Special ammo', traveltimes: 'Trips abroad', traveltime: 'Hours flying', itemsboughtabroad: 'Imports',
+    drugsused: 'Drugs', xantaken: 'Xanax', cantaken: 'Cannabis', exttaken: 'Ecstasy', kettaken: 'Ketamine', lsdtaken: 'LSD', opitaken: 'Opium',
+    pcptaken: 'PCP', shrtaken: 'Shrooms', spetaken: 'Speed', victaken: 'Vicodin', overdosed: 'Overdoses', candyused: 'Candy', energydrinkused: 'Energy drinks',
+    alcoholused: 'Alcohol', boostersused: 'Boosters', booksread: 'Books', statenhancersused: 'Stat enhancers', cityfinds: 'City finds', dumpfinds: 'Dump finds',
+    itemsdumped: 'Items trashed', missionscompleted: 'Missions', contractscompleted: 'Contracts', missioncreditsearned: 'Mission credits',
+    bountiescollected: 'Bounties', totalbountyreward: 'Bounty cash', racesentered: 'Races', raceswon: 'Races won', racingpointsearned: 'Racing points',
+    racingskill: 'Racing skill', refills: 'Energy refills', nerverefills: 'Nerve refills', tokenrefills: 'Token refills', jobpointsused: 'Job points',
+    organisedcrimes: 'OCs', criminaloffenses: 'Crimes', useractivity: 'Minutes active', bestactivestreak: 'Online streak', networth: 'Networth',
+    __level: 'Level', __age: 'Days old', __factiondays: 'Faction days', __married: 'Days married', __awards: 'Awards', __total: 'Battle stats',
+    __str: 'Strength', __def: 'Defense', __spd: 'Speed', __dex: 'Dexterity', __edu: 'Courses', __perks: 'Perks', __workmax: 'Working stat',
+  };
+  const sidebarLabel = (g) => (g.stat ? SHORT_LABEL[g.stat] || statLabel(g.stat) : goalLabel(g));
+
   function updateSidebar(views) {
     const box = document.getElementById(SIDEBAR_GOALS_ID);
     if (!box) return;
@@ -1240,10 +1259,11 @@
         const pct = isDaily ? v.pct : v.lifePct || 0;
         const right = v.checklist ? (v.awardEarned ? '✓' : 'to do') : isDaily ? `${v.met ? '✓ ' : ''}${fmt(v.done)}/${fmt(g.daily)}` : v.lifetime ? `${fmt(v.total)}/${fmt(v.lifetime)}` : fmt(v.total);
         const color = isGoalDone(v) ? '#7cbf5a' : isDaily ? '#c8a24c' : '#7d97d6';
-        const tip = isDaily ? `${goalLabel(g)}: ${fmt(v.done)} of ${fmt(g.daily)} today` : `${goalLabel(g)}${v.lifetime ? `: ${fmt(v.total)} of ${fmt(v.lifetime)}` : ''}`;
+        const full = g.award && g.stat ? `${statLabel(g.stat)} (${g.award.name})` : goalLabel(g);
+        const tip = isDaily ? `${full}: ${fmt(v.done)} of ${fmt(g.daily)} today` : `${full}${v.lifetime ? `: ${fmt(v.total)} of ${fmt(v.lifetime)}` : ''}`;
         return `<div data-mh-goal="1" title="${esc(tip)}" style="cursor:pointer;padding:2px 0">
           <div style="display:flex;gap:4px;align-items:center">
-          <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.85">${esc(goalLabel(g))}</span>
+          <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.85">${esc(sidebarLabel(g))}:</span>
           <span style="flex:none;font-weight:bold;${isGoalDone(v) ? 'color:#7cbf5a' : ''}">${right}</span></div>
           ${v.checklist ? '' : `<div style="height:3px;background:rgba(128,128,128,.25);border-radius:2px;overflow:hidden;margin-top:2px"><div style="height:100%;width:${pct}%;background:${color}"></div></div>`}</div>`;
       }).join('');

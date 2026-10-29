@@ -2,6 +2,11 @@
 
 All notable changes to Medal Detector. This project uses [semantic versioning](https://semver.org).
 
+## [2.0.3] – 2026-10-29
+
+### Changed
+- Goals in the sidebar use short stat names, like **Busts: 3/5** and **Blood bags: 6/10**, even when the goal is for a specific award. Hover to see the award.
+
 ## [2.0.2] – 2026-10-29
 
 ### Changed
@@ -77,6 +82,7 @@ First public release. Earlier versions were private test builds called **Merit H
 ### 1.0.0
 - Daily goals tracked against your real Torn stats, with streaks, history and reminders.
 
+[2.0.3]: https://github.com/Eaglewing91/Medal-Detector/releases/tag/v2.0.3
 [2.0.2]: https://github.com/Eaglewing91/Medal-Detector/releases/tag/v2.0.2
 [2.0.1]: https://github.com/Eaglewing91/Medal-Detector/releases/tag/v2.0.1
 [2.0.0]: https://github.com/Eaglewing91/Medal-Detector/releases/tag/v2.0.0
